@@ -5,10 +5,10 @@ import GameHome from "../../components/GameHomePage";
 import GamePlay from "../../components/GamePlay";
 import GameScore from "../../components/GameScore";
 
-const history = createHistory();
+//const history = createHistory();
 const Base = () => {
   return (
-    <Router history={history}>
+    <Router>
       <Switch>
         <Route exact path="/" component={GameHome} />
         <Route path="/game/play" component={GamePlay} />

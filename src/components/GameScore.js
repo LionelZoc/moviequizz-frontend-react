@@ -7,9 +7,9 @@ import Container from "@material-ui/core/Container";
 import CardActionArea from "@material-ui/core/CardActionArea";
 import Button from "@material-ui/core/Button";
 import _ from "lodash";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles} from "@material-ui/core/styles";
 
-import CardMedia from "@material-ui/core/CardMedia";
+
 import Typography from "@material-ui/core/Typography";
 import { bindActionCreators, compose } from "redux";
 import { connect } from "react-redux";
@@ -45,15 +45,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const GameScore = ({
-  match,
-  location,
+
   history,
   game,
-  createStatus,
   createGame
 }) => {
   const classes = useStyles();
-  const theme = useTheme();
 
   const restart = () => {
     createGame({ history: history, storeAs: "createGame" });
@@ -82,7 +79,7 @@ const GameScore = ({
 
 GameScore.propTypes = {
   location: PropTypes.object,
-  history: PropTypes.func,
+  history: PropTypes.object,
   match: PropTypes.object,
   createGame: PropTypes.func,
   game: PropTypes.object,

@@ -1,39 +1,37 @@
-import React from "react";
+import React, {useEffect} from "react";
 import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
+
 import CardContent from "@material-ui/core/CardContent";
 import PropTypes from "prop-types";
 import Container from "@material-ui/core/Container";
-import Paper from "@material-ui/core/Paper";
-import Grid from "@material-ui/core/Grid";
-import Avatar from "@material-ui/core/Avatar";
 import _ from "lodash";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 
 import CardMedia from "@material-ui/core/CardMedia";
 import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
-import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import SkipNextIcon from "@material-ui/icons/SkipNext";
-import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
+
 import CancelRoundedIcon from "@material-ui/icons/CancelRounded";
 import FavoriteRoundedIcon from "@material-ui/icons/FavoriteRounded";
 import { green } from "@material-ui/core/colors";
 import red from "@material-ui/core/colors/red";
 import { bindActionCreators, compose } from "redux";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
+import { getQuizz, answerQuizz } from "../ducks/quizz/actions";
+import { getQuizzSelector } from "../ducks/quizz/selectors";
+import { getGameSelector } from "../ducks/game/selectors";
+import {getFetchResultStatusSelector} from "../ducks/app/selectors";
 
 const useStyles = makeStyles(theme => ({
-  gamePlay:{
+  gamePlay: {
     marginTop: 100,
     height: 500,
-    backgroundColor:"black"
+    backgroundColor: "black"
   },
 
   root: {
     display: "flex",
-    borderColor:"red",
+    borderColor: "red",
     height: "100%"
   },
   details: {
@@ -49,7 +47,7 @@ const useStyles = makeStyles(theme => ({
   controls: {
     display: "flex",
     alignItems: "center",
-    justifyContent:"space-between",
+    justifyContent: "space-between",
     paddingLeft: theme.spacing(1),
     paddingBottom: theme.spacing(1)
   },
@@ -59,48 +57,67 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const GamePlay = ({ match, location, history , quizz}) => {
+const GamePlay = ({  history, quizz, game, answerQuizz, getQuizzStatus }) => {
   const classes = useStyles();
-  const theme = useTheme();
 
-  const onPress = ({ value }) => {
-    console.log("user respond", value);
-    history.push("/game/score");
+
+  const onPress = choice => {
+    answerQuizz({
+      response: choice,
+      question: _.get(quizz, "id"),
+      gameId: _.get(game, "id"),
+      storeAs: "answerQuizz",
+      history: history
+    });
   };
+  //fetch a quizz when game is created or redirect to homepage when user navigate manually to this page on start
+  useEffect(()=>{
+    if(_.get(game, "finished") === true && _.get(quizz, "id") === 0){
+      history.push("/");
+    }
+    if(_.get(game, "finished") === true && _.get(quizz, "id") !== 0 && !_.isEqual(getQuizzStatus, "pending")){
+      //getQuizz({storeAs:"getQuizz", history: history, gameId: _.get(game, "id")});
+      history.push("/game/score");
+    }
+  });
   return (
     <>
       <Container maxWidth="sm" className={classes.gamePlay}>
         <Card className={classes.root}>
-        <CardMedia
-          className={classes.cover}
-          image={_.get(quizz, "actorPoster")}
-          title={_.get(quizz, "actorName")}
-        />
+          <CardMedia
+            className={classes.cover}
+            image={_.get(quizz, "actor_poster")}
+            title={_.get(quizz, "actor_name")}
+          />
           <div className={classes.details}>
-
             <CardContent className={classes.content}>
               <Typography component="h5" variant="h5">
-                Does {_.get(quizz, "actorName")}  played in {_.get(quizz, "movieTitle", "this movie")} ?
+                Does {_.get(quizz, "actor_name")} played in{" "}
+                {_.get(quizz, "movie_title", "this movie")} ?
               </Typography>
-
             </CardContent>
 
             <div className={classes.controls}>
-              <IconButton aria-label="previous" onClick={onPress}>
-                <CancelRoundedIcon style={{ color: red[500] }} fontSize="large" />
+              <IconButton aria-label="previous" onClick={() => onPress("false")}>
+                <CancelRoundedIcon
+                  style={{ color: red[500] }}
+                  fontSize="large"
+                />
               </IconButton>
 
-              <IconButton aria-label="next" onClick={onPress}>
-                <FavoriteRoundedIcon style={{ color: green[500] }} fontSize="large" />
+              <IconButton aria-label="next" onClick={() => onPress("true")}>
+                <FavoriteRoundedIcon
+                  style={{ color: green[500] }}
+                  fontSize="large"
+                />
               </IconButton>
             </div>
           </div>
           <CardMedia
             className={classes.cover}
-            image={_.get(quizz, "moviePoster")}
-            title={_.get(quizz, "movieTitle")}
+            image={_.get(quizz, "movie_poster")}
+            title={_.get(quizz, "movie_title")}
           />
-
         </Card>
       </Container>
     </>
@@ -112,38 +129,29 @@ GamePlay.propTypes = {
   history: PropTypes.func,
   match: PropTypes.object,
   quizz: PropTypes.object,
-  responseStatus:PropTypes.string
+  responseStatus: PropTypes.string,
+  game: PropTypes.object,
+  getQuizz: PropTypes.func,
+  answerQuizz : PropTypes.func,
+  getQuizzStatus: PropTypes.string
 };
 
 const mapStateToProps = state => {
-// return{
-//   game:getGame(state)
-// }
-return{
-  quizz:
+  return {
+    quizz: getQuizzSelector(state),
+    game: getGameSelector(state),
+    responseStatus: getFetchResultStatusSelector(state, "answerQuizz"),
+    getQuizzStatus: getFetchResultStatusSelector(state, "getQuizz")
+  };
+};
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
     {
-      id: 4,
- moviePoster: "https://image.tmdb.org/t/p/original/qZ1KAgfdeNbzrNYKW4BIRHdEBJ9.jpg",
- movieTitle: "Dragon heart",
- actorPoster: "https://image.tmdb.org/t/p/original/5MgWM8pkUiYkj9MEaEpO0Ir1FD9.jpg",
- actorName: "Cho Yeo-jeong"
-    }
-  ,
-  responseStatus: "pending"
-};
-};
+      getQuizz,
+      answerQuizz
+    },
+    dispatch
+  );
 
-// const mapDispatchToProps = dispatch =>
-//   bindActionCreators(
-//     {
-//       createGame
-//     },
-//     dispatch
-//   );
-
-export default compose(
-  connect(
-    mapStateToProps,
-    //mapDispatchToProps
-  )
-)(GamePlay);
+export default compose(connect(mapStateToProps, mapDispatchToProps))(GamePlay);

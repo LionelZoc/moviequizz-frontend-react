@@ -43,3 +43,10 @@ export const getGameFailure = params => {
     payload: params
   };
 };
+
+export const updateGame = params => {
+  return {
+    type: actionTypes.UPDATE_GAME,
+    payload: params
+  };
+};

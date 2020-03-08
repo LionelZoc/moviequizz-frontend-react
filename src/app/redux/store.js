@@ -7,7 +7,7 @@ import rootReducer from "./reducers";
 
 const sagaMiddleware = createSagaMiddleware();
 export default function configureStore(preloadedState) {
-  //const middlewares = [apiCallsMiddleware, loggerMiddleware, thunkMiddleware.withExtraArgument(getFirestore), routerMiddleware(history)];
+  //add saga middleware
   const middlewares = [sagaMiddleware];
   const middlewareEnhancer = applyMiddleware(...middlewares);
 

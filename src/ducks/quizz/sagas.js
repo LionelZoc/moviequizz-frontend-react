@@ -1,12 +1,11 @@
 import { call, put, all, takeLatest } from "redux-saga/effects";
 import * as actionTypes from "./actionTypes";
 import * as actions from "./actions";
-import * as quizzActions from "../quizz/actions";
+import * as gameActions from "../game/actions";
 import * as services from "./services";
 import * as appActions from "../app/actions";
 import _ from "lodash";
-
-function* createGame(action) {
+function* getQuizz(action) {
   try {
     yield put(
       appActions.setRequestStatus({
@@ -15,11 +14,11 @@ function* createGame(action) {
       })
     );
 
-    const result = yield call(services.createGame, action.payload);
+    const result = yield call(services.getQuizz, action.payload);
 
     yield put(
-      actions.createGameSuccess({
-        game: result
+      actions.getQuizzSuccess({
+        quizz: result
       })
     );
     yield put(
@@ -28,17 +27,8 @@ function* createGame(action) {
         status: "success"
       })
     );
-    yield put(
-      quizzActions.getQuizz({
-        storeAs: "getQuizz",
-        history: action.payload.history,
-        gameId: _.get(result, "id")
-      })
-    );
-    if (_.has(action, "payload.history")) {
-      action.payload.history.push("/game/play");
-    }
   } catch (e) {
+    console.log(e);
     yield put(
       appActions.setRequestStatus({
         id: action.payload.storeAs,
@@ -49,7 +39,7 @@ function* createGame(action) {
 }
 
 // }
-function* getGame(action) {
+function* answerQuizz(action) {
   try {
     yield put(
       appActions.setRequestStatus({
@@ -58,19 +48,26 @@ function* getGame(action) {
       })
     );
 
-    const result = yield call(services.getGame, action.payload);
+    const result = yield call(services.answerQuizz, action.payload);
+    console.log("answerQuizz", result);
 
-    yield put(
-      actions.getGameSuccess({
-        game: result
-      })
-    );
 
     yield put(
       appActions.setRequestStatus({
         id: action.payload.storeAs,
         status: "success"
       })
+    );
+
+//update game
+    yield put(
+      gameActions.updateGame({
+        game: result
+      })
+    );
+//fetch new quizz
+    yield put(
+      actions.getQuizz({storeAs:"getQuizz", history: action.payload.history, gameId: _.get(result, "id")})
     );
   } catch (e) {
     yield put(
@@ -84,7 +81,7 @@ function* getGame(action) {
 
 export default function*() {
   yield all([
-    yield takeLatest(actionTypes.CREATE_GAME, createGame),
-    yield takeLatest(actionTypes.GET_GAME, getGame)
+    yield takeLatest(actionTypes.GET_QUIZZ, getQuizz),
+    yield takeLatest(actionTypes.ANSWER_QUIZZ, answerQuizz)
   ]);
 }

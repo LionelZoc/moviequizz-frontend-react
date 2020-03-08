@@ -6,14 +6,14 @@ import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import CardMedia from "@material-ui/core/CardMedia";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import { bindActionCreators, compose } from "redux";
 import { connect } from "react-redux";
 import { createGame } from "../ducks/game/actions";
 import { getGameSelector } from "../ducks/game/selectors";
 import { getFetchResultStatusSelector } from "../ducks/app/selectors";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles( () => ({
   root: {
     display: "flex"
   },
@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
     display: "flex"
   }
 }));
-const HomePage = ({ match, location, history, createGame }) => {
+const HomePage = ({  history, createGame }) => {
   const classes = useStyles();
   const onStart = () => {
     createGame({ history: history, storeAs: "createGame" });
