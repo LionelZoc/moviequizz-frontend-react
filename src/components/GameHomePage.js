@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import logo from "../logo.svg";
+import logo from "../movie.jpg";
 import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
@@ -32,7 +32,7 @@ const HomePage = ({  history, createGame }) => {
   return (
     <>
       <Container maxWidth="xl" className={classes.root}>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={5}>
           <Paper>
             <CardMedia component="img" src={logo} />
           </Paper>

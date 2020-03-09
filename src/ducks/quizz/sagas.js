@@ -51,7 +51,6 @@ function* answerQuizz(action) {
     const result = yield call(services.answerQuizz, action.payload);
     console.log("answerQuizz", result);
 
-
     yield put(
       appActions.setRequestStatus({
         id: action.payload.storeAs,
@@ -59,15 +58,19 @@ function* answerQuizz(action) {
       })
     );
 
-//update game
+    //update game
     yield put(
       gameActions.updateGame({
         game: result
       })
     );
-//fetch new quizz
+    //fetch new quizz
     yield put(
-      actions.getQuizz({storeAs:"getQuizz", history: action.payload.history, gameId: _.get(result, "id")})
+      actions.getQuizz({
+        storeAs: "getQuizz",
+        history: action.payload.history,
+        gameId: _.get(result, "id")
+      })
     );
   } catch (e) {
     yield put(

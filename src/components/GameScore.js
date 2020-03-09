@@ -7,8 +7,7 @@ import Container from "@material-ui/core/Container";
 import CardActionArea from "@material-ui/core/CardActionArea";
 import Button from "@material-ui/core/Button";
 import _ from "lodash";
-import { makeStyles} from "@material-ui/core/styles";
-
+import { makeStyles } from "@material-ui/core/styles";
 
 import Typography from "@material-ui/core/Typography";
 import { bindActionCreators, compose } from "redux";
@@ -44,12 +43,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const GameScore = ({
-
-  history,
-  game,
-  createGame
-}) => {
+const GameScore = ({ history, game, createGame }) => {
   const classes = useStyles();
 
   const restart = () => {
@@ -87,9 +81,6 @@ GameScore.propTypes = {
 };
 
 const mapStateToProps = state => {
-  // return{
-  //   game:getGame(state)
-  // }
   return {
     game: getGameSelector(state),
     createStatus: getFetchResultStatusSelector(state, "createGame")

@@ -38,3 +38,10 @@ export const answerQuizzFailure = params => {
     payload: params
   };
 };
+
+export const resetQuizz = params => {
+  return {
+    type: actionTypes.RESET_QUIZZ,
+    payload: params
+  };
+};
