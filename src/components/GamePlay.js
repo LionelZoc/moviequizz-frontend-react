@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import Card from "@material-ui/core/Card";
 
 import CardContent from "@material-ui/core/CardContent";
@@ -17,21 +17,25 @@ import { green } from "@material-ui/core/colors";
 import red from "@material-ui/core/colors/red";
 import { bindActionCreators, compose } from "redux";
 import { connect } from "react-redux";
-import { getQuizz, answerQuizz } from "../ducks/quizz/actions";
+import { getQuizz, answerQuizz, resetQuizz } from "../ducks/quizz/actions";
 import { getQuizzSelector } from "../ducks/quizz/selectors";
 import { getGameSelector } from "../ducks/game/selectors";
-import {getFetchResultStatusSelector} from "../ducks/app/selectors";
+import { getFetchResultStatusSelector } from "../ducks/app/selectors";
+
+import LinearProgress from "@material-ui/core/LinearProgress";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const useStyles = makeStyles(theme => ({
   gamePlay: {
-    marginTop: 100,
-    height: 500,
-    backgroundColor: "black"
+    height: "100vh",
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 30
   },
 
   root: {
     display: "flex",
-    borderColor: "red",
     height: "100%"
   },
   details: {
@@ -42,7 +46,7 @@ const useStyles = makeStyles(theme => ({
     flex: "1 0 auto"
   },
   cover: {
-    width: 400
+    width: 500
   },
   controls: {
     display: "flex",
@@ -54,13 +58,25 @@ const useStyles = makeStyles(theme => ({
   playIcon: {
     height: 38,
     width: 38
+  },
+  loadingIndicator: {
+    position: "absolute",
+    top: "50%",
+    left: "50%"
   }
 }));
 
-const GamePlay = ({  history, quizz, game, answerQuizz, getQuizzStatus }) => {
+const GamePlay = ({
+  history,
+  quizz,
+  game,
+  answerQuizz,
+  getQuizzStatus,
+  resetQuizz
+}) => {
   const classes = useStyles();
 
-
+  //answerQuizz
   const onPress = choice => {
     answerQuizz({
       response: choice,
@@ -70,19 +86,29 @@ const GamePlay = ({  history, quizz, game, answerQuizz, getQuizzStatus }) => {
       history: history
     });
   };
-  //fetch a quizz when game is created or redirect to homepage when user navigate manually to this page on start
-  useEffect(()=>{
-    if(_.get(game, "finished") === true && _.get(quizz, "id") === 0){
+  // redirect to homepage when user navigate manually to this page on start
+  useEffect(() => {
+    //redirect to homepage when game is not started
+    if (_.get(game, "finished") === true && _.get(quizz, "id") === 0) {
       history.push("/");
     }
-    if(_.get(game, "finished") === true && _.get(quizz, "id") !== 0 && !_.isEqual(getQuizzStatus, "pending")){
-      //getQuizz({storeAs:"getQuizz", history: history, gameId: _.get(game, "id")});
+    //redirect to score wheng game finished
+    if (
+      _.get(game, "finished") === true &&
+      _.get(quizz, "id") !== 0 &&
+      !_.isEqual(getQuizzStatus, "pending")
+    ) {
+      //finish game
+      resetQuizz();
       history.push("/game/score");
     }
   });
   return (
     <>
-      <Container maxWidth="sm" className={classes.gamePlay}>
+      <Container maxWidth="lg" className={classes.gamePlay}>
+        {_.isEqual(getQuizzStatus, "pending") && (
+          <CircularProgress className={classes.loadingIndicator} />
+        )}
         <Card className={classes.root}>
           <CardMedia
             className={classes.cover}
@@ -98,7 +124,10 @@ const GamePlay = ({  history, quizz, game, answerQuizz, getQuizzStatus }) => {
             </CardContent>
 
             <div className={classes.controls}>
-              <IconButton aria-label="previous" onClick={() => onPress("false")}>
+              <IconButton
+                aria-label="previous"
+                onClick={() => onPress("false")}
+              >
                 <CancelRoundedIcon
                   style={{ color: red[500] }}
                   fontSize="large"
@@ -119,6 +148,7 @@ const GamePlay = ({  history, quizz, game, answerQuizz, getQuizzStatus }) => {
             title={_.get(quizz, "movie_title")}
           />
         </Card>
+        {_.isEqual(getQuizzStatus, "pending") && <LinearProgress />}
       </Container>
     </>
   );
@@ -129,10 +159,10 @@ GamePlay.propTypes = {
   history: PropTypes.func,
   match: PropTypes.object,
   quizz: PropTypes.object,
-  responseStatus: PropTypes.string,
   game: PropTypes.object,
   getQuizz: PropTypes.func,
-  answerQuizz : PropTypes.func,
+  resetQuizz: PropTypes.func,
+  answerQuizz: PropTypes.func,
   getQuizzStatus: PropTypes.string
 };
 
@@ -140,7 +170,6 @@ const mapStateToProps = state => {
   return {
     quizz: getQuizzSelector(state),
     game: getGameSelector(state),
-    responseStatus: getFetchResultStatusSelector(state, "answerQuizz"),
     getQuizzStatus: getFetchResultStatusSelector(state, "getQuizz")
   };
 };
@@ -149,7 +178,8 @@ const mapDispatchToProps = dispatch =>
   bindActionCreators(
     {
       getQuizz,
-      answerQuizz
+      answerQuizz,
+      resetQuizz
     },
     dispatch
   );

@@ -1,6 +1,6 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import createHistory from "history/createBrowserHistory";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+
 import GameHome from "../../components/GameHomePage";
 import GamePlay from "../../components/GamePlay";
 import GameScore from "../../components/GameScore";

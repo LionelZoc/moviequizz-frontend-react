@@ -12,19 +12,20 @@ import _ from "lodash";
 // };
 const initialState = {
   id: 0,
-  movie_poster:
-    "",
+  movie_poster: "",
   movie_title: "",
-  actor_poster:
-    "",
+  actor_poster: "",
   actor_name: ""
 };
 
 const gameReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.GET_QUIZZ_SUCCESS:
-    //return the new quizz or the previous state if nothing is found
+      //return the new quizz or the previous state if nothing is found
       return _.get(action, "payload.quizz", state);
+    case actionTypes.RESET_QUIZZ:
+      //return the new quizz or the previous state if nothing is found
+      return initialState;
     default:
       return state;
   }
